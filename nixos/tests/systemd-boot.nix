@@ -599,6 +599,23 @@ in
     '';
   };
 
+  currentGenerationFile = makeTest {
+    name = "systemd-current-generation";
+    meta.maintainers = with pkgs.lib.maintainers; [ micha4w ];
+    nodes.machine = common;
+
+    testScript =
+      { nodes, ... }:
+      ''
+        machine.start()
+        machine.wait_for_unit("multi-user.target")
+
+        machine.succeed(
+            "bootctl list | grep 'title: NixOS' | head -n1 | grep -q 'Current Profile'"
+        )
+      '';
+  };
+
   rememberLastChoice = makeTest {
     name = "systemd-remember-last-choice";
     meta.maintainers = with pkgs.lib.maintainers; [ noar-t ];
@@ -607,7 +624,6 @@ in
       {
         imports = [ common ];
         boot.loader.systemd-boot.rememberLastChoice = true;
-
       };
 
     testScript =
